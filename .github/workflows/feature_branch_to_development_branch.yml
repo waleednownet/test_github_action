@@ -71,7 +71,7 @@ jobs:
     # Step 11: Run Periphery (for unused code detection)
     - name: Run Periphery
       run: |
-         periphery scan --project test_github_action.xcodeproj --schemes "test_github_action"
+        periphery scan --project test_github_action.xcodeproj --schemes "test_github_action" --destination 'platform=iOS Simulator,name=iPhone 14'
 
     # Step 12: Run Slather (for code coverage reports)
     - name: Run Slather
