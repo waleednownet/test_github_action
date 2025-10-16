@@ -79,7 +79,7 @@ jobs:
 
     - name: Run Periphery with simulator
       run: |
-          periphery scan --project test_github_action.xcodeproj --schemes "test_github_action" --platform iOS --device "iPhone 16" --verbose
+          periphery scan --project test_github_action.xcodeproj --schemes "test_github_action"
 
 
     # Step 9: Run SwiftLint
