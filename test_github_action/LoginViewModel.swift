@@ -6,14 +6,13 @@
 //
 
 
-final class test_viewModel {
+final class testviewModel {
     let text_h = "Hello, World!"
     let textHe = "World, Hello!"
     
     func tes() {
         
     }
-    
     
     func HELLLO_TEST() {
         
