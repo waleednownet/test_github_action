@@ -15,7 +15,10 @@ jobs:
     # Step 1: Checkout the PR code
     - name: Checkout the code
       uses: actions/checkout@v2
-
+      
+    - name: List available simulators
+      run: |
+          xcrun simctl list devices
     
     # Step 3: Install dependencies (if using CocoaPods or Carthage)
     - name: Install dependencies
