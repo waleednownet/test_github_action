@@ -20,7 +20,7 @@ jobs:
     - name: Set up Swift
       uses: swift-actions/setup-swift@v1
       with:
-            swift-version: 'latest'# Correct action for Swift setup
+            swift-version: 'latest' # Correct action for Swift setup
 
     # Step 3: Install dependencies (if using CocoaPods or Carthage)
     - name: Install dependencies
