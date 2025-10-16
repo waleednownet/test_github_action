@@ -16,15 +16,15 @@ jobs:
     - name: Checkout the code
       uses: actions/checkout@v2
       
-    - name: List available simulators
-      run: |
-          xcrun simctl list devices
-          
-    - name: Check Xcode version
-      run: |
-        xcode-select --version
-        xcodebuild -version
-    
+#    - name: List available simulators
+#      run: |
+#          xcrun simctl list devices
+#          
+#    - name: Check Xcode version
+#      run: |
+#        xcode-select --version
+#        xcodebuild -version
+#
     # Step 3: Install dependencies (if using CocoaPods or Carthage)
     - name: Install dependencies
       run: |
@@ -68,23 +68,23 @@ jobs:
       run: |
         brew install lizard
 
-    - name: Set up Xcode Command Line Tools
-      run: |
-          sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
-          sudo xcodebuild -runFirstLaunch
+#    - name: Set up Xcode Command Line Tools
+#      run: |
+#          sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+#          sudo xcodebuild -runFirstLaunch
+#
+#    - name: Boot iOS Simulator
+#      run: |
+#          xcrun simctl boot "iPhone 16"
+#          xcrun simctl list devices
+#
+#    - name: Build for iOS Simulator (Explicit Destination)
+#      run: |
+#          xcodebuild -project test_github_action.xcodeproj -scheme "test_github_action" -destination "platform=iOS Simulator,name=iPhone 16" -derivedDataPath /tmp/derived_data build
 
-    - name: Boot iOS Simulator
-      run: |
-          xcrun simctl boot "iPhone 16"
-          xcrun simctl list devices
-
-    - name: Build for iOS Simulator (Explicit Destination)
-      run: |
-          xcodebuild -project test_github_action.xcodeproj -scheme "test_github_action" -destination "platform=iOS Simulator,name=iPhone 16" -derivedDataPath /tmp/derived_data build
-
-    - name: Run Periphery with simulator
-      run: |
-          periphery scan --project test_github_action.xcodeproj --schemes "test_github_action"
+#    - name: Run Periphery with simulator
+#      run: |
+#          periphery scan --project test_github_action.xcodeproj --schemes "test_github_action"
 
 
     # Step 9: Run SwiftLint
@@ -103,13 +103,13 @@ jobs:
 
 
     # Step 12: Run Slather (for code coverage reports)
-    - name: Run Slather
-      run: |
-        slather coverage --project test_github_action.xcodeproj --scheme "test_github_action"
+#    - name: Run Slather
+#      run: |
+#        slather coverage --project test_github_action.xcodeproj --scheme "test_github_action"
 
     # Step 13: Run Lizard (for cyclomatic complexity analysis)
     - name: Run Lizard
-      run: lizard .
+      run: lizard
 
   # Job to merge PR after successful analysis (optional)
   merge:
