@@ -70,7 +70,7 @@ jobs:
 
     # Step 11: Run Periphery (for unused code detection)
     - name: Run Periphery
-       run: |
+      run: |
          periphery scan --project test_github_action.xcodeproj --schemes "YourScheme"
 
     # Step 12: Run Slather (for code coverage reports)
