@@ -6,7 +6,7 @@
 //
 
 
-final class testviewModel {
+final class TestviewModel {
     let text_h = "Hello, World!"
     let textHe = "World, Hello!"
     
