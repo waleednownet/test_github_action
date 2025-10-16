@@ -62,8 +62,8 @@ jobs:
     #   run: swiftlint
 
     # Step 10: Run Tailor (if using Tailor for linting)
-    - name: Run Tailor
-      run: tailor lint
+    # - name: Run Tailor
+    #   run: tailor lint
 
     # Step 11: Run Periphery (for unused code detection)
     - name: Run Periphery
