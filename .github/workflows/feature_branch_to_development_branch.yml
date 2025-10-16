@@ -32,28 +32,51 @@ jobs:
           carthage bootstrap --platform iOS
         fi
 
-    # Step 4: Run SwiftLint
+    # Step 4: Install SwiftLint
+    - name: Install SwiftLint
+      run: |
+        brew install swiftlint
+
+    # Step 5: Install Tailor (if using Tailor for linting)
+    - name: Install Tailor
+      run: |
+        gem install tailor
+
+    # Step 6: Install Periphery (for unused code detection)
+    - name: Install Periphery
+      run: |
+        brew install periphery-tools
+
+    # Step 7: Install Slather (for code coverage reports)
+    - name: Install Slather
+      run: |
+        gem install slather
+
+    # Step 8: Install Lizard (for cyclomatic complexity analysis)
+    - name: Install Lizard
+      run: |
+        brew install lizard
+
+    # Step 9: Run SwiftLint
     - name: Run SwiftLint
       run: swiftlint
 
-    # Step 5: Run Tailor (if using Tailor for linting)
+    # Step 10: Run Tailor (if using Tailor for linting)
     - name: Run Tailor
       run: tailor lint
 
-    # Step 6: Run Periphery (for unused code detection)
+    # Step 11: Run Periphery (for unused code detection)
     - name: Run Periphery
       run: periphery scan
 
-    # Step 7: Run Slather (for code coverage reports)
+    # Step 12: Run Slather (for code coverage reports)
     - name: Run Slather
       run: |
         slather coverage --project test_github_action.xcodeproj --scheme "YourScheme"
 
-    # Step 8: Run Lizard (for cyclomatic complexity analysis)
+    # Step 13: Run Lizard (for cyclomatic complexity analysis)
     - name: Run Lizard
-      run: |
-        brew install lizard
-        lizard .
+      run: lizard .
 
   # Job to merge PR after successful analysis (optional)
   merge:
