@@ -72,7 +72,7 @@ jobs:
     # Step 11: Run Periphery (for unused code detection)
     - name: Run Periphery
       run: |
-        periphery scan --project test_github_action.xcodeproj --schemes "test_github_action" --platform iOS --device "iPhone 14"
+        periphery scan --project test_github_action.xcodeproj --schemes "test_github_action" 
 
 
 
