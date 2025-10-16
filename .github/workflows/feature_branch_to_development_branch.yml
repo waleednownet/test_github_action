@@ -61,21 +61,21 @@ jobs:
         brew install lizard
 
     - name: Set up Xcode Command Line Tools
-        run: |
+      run: |
           sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
           sudo xcodebuild -runFirstLaunch
 
-      - name: Boot iOS Simulator
-        run: |
+    - name: Boot iOS Simulator
+      run: |
           xcrun simctl boot "iPhone 14"
           xcrun simctl list devices
 
-      - name: Build for iOS Simulator (Explicit Destination)
-        run: |
+    - name: Build for iOS Simulator (Explicit Destination)
+      run: |
           xcodebuild -project test_github_action.xcodeproj -scheme "test_github_action" -destination "platform=iOS Simulator,name=iPhone 14" -derivedDataPath /tmp/derived_data build
 
-      - name: Run Periphery with simulator
-        run: |
+    - name: Run Periphery with simulator
+      run: |
           periphery scan --project test_github_action.xcodeproj --schemes "test_github_action" --platform iOS --device "iPhone 14" --verbose
 
 
