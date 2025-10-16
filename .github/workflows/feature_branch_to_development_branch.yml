@@ -70,16 +70,16 @@ jobs:
 
     - name: Boot iOS Simulator
       run: |
-          xcrun simctl boot "iPhone 14"
+          xcrun simctl boot "iPhone 16"
           xcrun simctl list devices
 
     - name: Build for iOS Simulator (Explicit Destination)
       run: |
-          xcodebuild -project test_github_action.xcodeproj -scheme "test_github_action" -destination "platform=iOS Simulator,name=iPhone 14" -derivedDataPath /tmp/derived_data build
+          xcodebuild -project test_github_action.xcodeproj -scheme "test_github_action" -destination "platform=iOS Simulator,name=iPhone 16" -derivedDataPath /tmp/derived_data build
 
     - name: Run Periphery with simulator
       run: |
-          periphery scan --project test_github_action.xcodeproj --schemes "test_github_action" --platform iOS --device "iPhone 14" --verbose
+          periphery scan --project test_github_action.xcodeproj --schemes "test_github_action" --platform iOS --device "iPhone 16" --verbose
 
 
     # Step 9: Run SwiftLint
