@@ -19,6 +19,11 @@ jobs:
     - name: List available simulators
       run: |
           xcrun simctl list devices
+          
+    - name: Check Xcode version
+      run: |
+        xcode-select --version
+        xcodebuild -version
     
     # Step 3: Install dependencies (if using CocoaPods or Carthage)
     - name: Install dependencies
