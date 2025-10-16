@@ -18,7 +18,7 @@ jobs:
 
     # Step 2: Set up Swift
     - name: Set up Swift
-      uses: apple-actions/setup-swift@v1
+      uses: swift-actions/setup-swift@v1  # Correct action for Swift setup
 
     # Step 3: Install dependencies (if using CocoaPods or Carthage)
     - name: Install dependencies
@@ -65,14 +65,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      # Step 1: Set up Git configuration for the merge
       - name: Set up Git configuration
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
 
+      # Step 2: Merge feature branch into development
       - name: Merge feature branch into development
         run: |
           git fetch origin development
           git checkout development
           git merge --no-ff ${{ github.head_ref }}  # Merge the feature branch into development
-          git push origin development
+
+      # Step 3: Push the merged changes to the remote repository
+      - name: Push merged changes to development
+        run: git push origin development
