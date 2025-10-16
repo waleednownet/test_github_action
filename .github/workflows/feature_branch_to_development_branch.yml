@@ -71,12 +71,12 @@ jobs:
     # Step 11: Run Periphery (for unused code detection)
     - name: Run Periphery
       run: |
-         periphery scan --project test_github_action.xcodeproj --schemes "YourScheme"
+         periphery scan --project test_github_action.xcodeproj --schemes "test_github_action"
 
     # Step 12: Run Slather (for code coverage reports)
     - name: Run Slather
       run: |
-        slather coverage --project test_github_action.xcodeproj --scheme "YourScheme"
+        slather coverage --project test_github_action.xcodeproj --scheme "test_github_action"
 
     # Step 13: Run Lizard (for cyclomatic complexity analysis)
     - name: Run Lizard
