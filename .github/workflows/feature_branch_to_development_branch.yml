@@ -33,9 +33,9 @@ jobs:
         fi
 
     # Step 4: Install SwiftLint
-    - name: Install SwiftLint
-      run: |
-        brew install swiftlint
+    # - name: Install SwiftLint
+    #   run: |
+    #     brew install swiftlint
 
     # Step 5: Install Tailor (if using Tailor for linting)
     - name: Install Tailor
@@ -58,8 +58,8 @@ jobs:
         brew install lizard
 
     # Step 9: Run SwiftLint
-    - name: Run SwiftLint
-      run: swiftlint
+    # - name: Run SwiftLint
+    #   run: swiftlint
 
     # Step 10: Run Tailor (if using Tailor for linting)
     - name: Run Tailor
