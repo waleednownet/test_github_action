@@ -16,9 +16,9 @@ jobs:
     - name: Checkout the code
       uses: actions/checkout@v2
 
-    # Step 2: Set up Swift
+    # Step 2: Set up Swift using the correct GitHub action
     - name: Set up Swift
-      uses: apple-actions/setup-swift@v1
+      uses: actions/setup-swift@v1
 
     # Step 3: Install dependencies (if using CocoaPods or Carthage)
     - name: Install dependencies
