@@ -18,4 +18,8 @@ final class test_viewModel {
     func HELLLO_TEST() {
         
     }
+    
+    func TEST_KASDF() {
+        
+    }
 }
