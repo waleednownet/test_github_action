@@ -11,6 +11,7 @@ jobs:
     runs-on: macos-latest
     env:
       PROJECT: "test_github_action.xcodeproj"
+      SCHEME: "test_github_action"
       LIZARD_CCN_THRESHOLD: "15"
 
     steps:
@@ -86,17 +87,11 @@ jobs:
 
       - name: Periphery — unused code scan (JSON output)
         run: |
-          set -e
-          if [ -f .periphery.yml ]; then
-            periphery scan --format json --verbose > periphery-report.json
-          else
-            periphery scan \
-              --project "$PROJECT" \
-              --scheme "test_github_action" \
-              --format json \
-              --verbose > periphery-report.json
-          fi
-          echo "Periphery report saved as periphery-report.json"
+          periphery scan \
+            --project "$PROJECT" \
+            --schemes "$SCHEME" \
+            --format json \
+            --verbose > periphery-report.json
           
         continue-on-error: true
 
