@@ -131,7 +131,7 @@ jobs:
 
       - name: Run Periphery to Check for Unused Code
         run: |
-          periphery scan --workspace YourWorkspace.xcworkspace --scheme YourScheme
+          periphery scan --workspace test_github_action.xcworkspace --scheme test_github_action
 
   # Job to merge PR after successful analysis (optional)
   
