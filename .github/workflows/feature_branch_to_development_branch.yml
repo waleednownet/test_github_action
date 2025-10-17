@@ -31,7 +31,8 @@ jobs:
       - name: Run SwiftLint
         run: |
           swiftlint lint
-        continue-on-error: true  # This will allow the PR to be merged even if SwiftLint finds issues, remove this line if you want to block merges based on lint results
+        # Don't allow PR merge if there are issues
+        continue-on-error: false  # Workflow fails if there are any lint issues
 
       - name: Upload SwiftLint report
         uses: actions/upload-artifact@v3
