@@ -134,28 +134,29 @@ jobs:
           periphery scan --workspace YourWorkspace.xcworkspace --scheme YourScheme
 
   # Job to merge PR after successful analysis (optional)
+  
   merge:
-    needs: code-analysis  # This job depends on the successful completion of code-analysis
-    runs-on: ubuntu-latest
-    if: success()  # Proceed only if the previous job succeeded
+      needs: code-analysis  # This job depends on the successful completion of code-analysis
+      runs-on: ubuntu-latest
+      if: success()  # Proceed only if the previous job succeeded
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v2
 
       # Step 1: Set up Git configuration for the merge
-      - name: Set up Git configuration
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
+        - name: Set up Git configuration
+          run: |
+            git config --global user.name "GitHub Actions"
+            git config --global user.email "actions@github.com"
 
       # Step 2: Merge feature branch into development
-      - name: Merge feature branch into development
-        run: |
-          git fetch origin development
-          git checkout development
-          git merge --no-ff ${{ github.head_ref }}  # Merge the feature branch into development
+        - name: Merge feature branch into development
+          run: |
+            git fetch origin development
+            git checkout development
+            git merge --no-ff ${{ github.head_ref }}  # Merge the feature branch into development
 
       # Step 3: Push the merged changes to the remote repository
-      - name: Push merged changes to development
-        run: git push origin development
+        - name: Push merged changes to development
+          run: git push origin development
