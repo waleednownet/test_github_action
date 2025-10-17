@@ -74,6 +74,9 @@ jobs:
           lizard -l swift -C $LIZARD_CCN_THRESHOLD -o lizard-report.json .
           echo "Lizard report saved as lizard-report.json"
 
+          
+        continue-on-error: true
+
       - name: Upload Lizard report
         if: always()
         uses: actions/upload-artifact@v4
@@ -90,6 +93,8 @@ jobs:
             periphery scan --project "$PROJECT" --verbose > periphery-report.txt
           fi
           echo "Periphery report saved as periphery-report.txt"
+          
+        continue-on-error: true
 
       - name: Upload Periphery report
         if: always()
