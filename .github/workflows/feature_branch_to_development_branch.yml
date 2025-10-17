@@ -6,114 +6,10 @@ on:
     branches:
       - development  # Trigger when there's a PR to the development branch
 
-# jobs:
-#   # Job for running static analysis tools and tests
-#   code-analysis:
-#     runs-on: macos-latest  # Since you’re working with Swift, macOS is required
-
-#     steps:
-#     # Step 1: Checkout the PR code
-#     - name: Checkout the code
-#       uses: actions/checkout@v2
-      
-# #    - name: List available simulators
-# #      run: |
-# #          xcrun simctl list devices
-# #          
-# #    - name: Check Xcode version
-# #      run: |
-# #        xcode-select --version
-# #        xcodebuild -version
-# #
-#     # Step 3: Install dependencies (if using CocoaPods or Carthage)
-#     - name: Install dependencies
-#       run: |
-#         if [ -f "Podfile" ]; then
-#           gem install cocoapods
-#           pod install
-#         fi
-#         if [ -f "Cartfile" ]; then
-#           brew install carthage
-#           carthage bootstrap --platform iOS
-#         fi
-        
-#     # Step 2: Set up Swift
-#     - name: Install Swift
-#       run: |
-#         brew update
-#         brew install swift
-#         swift --version
-#     # Step 4: Install SwiftLint
-#     # - name: Install SwiftLint
-#     #   run: |
-#     #     brew install swiftlint
-
-#     # Step 5: Install Tailor (if using Tailor for linting)
-#     - name: Install Tailor
-#       run: |
-#         gem install tailor
-
-#     # Step 6: Install Periphery (for unused code detection)
-#     - name: Install Periphery
-#       run: |
-#         brew install periphery  # Correct formula
-
-#     # Step 7: Install Slather (for code coverage reports)
-#     - name: Install Slather
-#       run: |
-#         gem install slather
-
-#     # Step 8: Install Lizard (for cyclomatic complexity analysis)
-#     - name: Install Lizard
-#       run: |
-#         brew install lizard
-
-# #    - name: Set up Xcode Command Line Tools
-# #      run: |
-# #          sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
-# #          sudo xcodebuild -runFirstLaunch
-# #
-# #    - name: Boot iOS Simulator
-# #      run: |
-# #          xcrun simctl boot "iPhone 16"
-# #          xcrun simctl list devices
-# #
-# #    - name: Build for iOS Simulator (Explicit Destination)
-# #      run: |
-# #          xcodebuild -project test_github_action.xcodeproj -scheme "test_github_action" -destination "platform=iOS Simulator,name=iPhone 16" -derivedDataPath /tmp/derived_data build
-
-# #    - name: Run Periphery with simulator
-# #      run: |
-# #          periphery scan --project test_github_action.xcodeproj --schemes "test_github_action"
-
-
-#     # Step 9: Run SwiftLint
-#     # - name: Run SwiftLint
-#     #   run: swiftlint
-
-#     # Step 10: Run Tailor (if using Tailor for linting)
-#     # - name: Run Tailor
-#     #   run: tailor lint
-
-#     # Step 11: Run Periphery (for unused code detection)
-# #    - name: Run Periphery
-# #      run: |
-# #        periphery scan --project test_github_action.xcodeproj --schemes "test_github_action" 
-
-
-
-#     # Step 12: Run Slather (for code coverage reports)
-# #    - name: Run Slather
-# #      run: |
-# #        slather coverage --project test_github_action.xcodeproj --scheme "test_github_action"
-
-#     # Step 13: Run Lizard (for cyclomatic complexity analysis)
-#     - name: Run Lizard
-#       run: lizard
-
 jobs:
-  periphery:
-    runs-on: macos-latest  # macOS environment is required for Swift
+  # Job for running static analysis tools and tests
+  code-analysis:
+    runs-on: macos-latest  # Since you’re working with Swift, macOS is required
 
     steps:
       - name: Checkout Code
@@ -124,39 +20,71 @@ jobs:
         with:
           xcode-version: 'latest'  # or specify the version you need
 
+      # Step 3: Install dependencies (if using CocoaPods or Carthage)
+      - name: Install dependencies
+        run: |
+          if [ -f "Podfile" ]; then
+            gem install cocoapods
+            pod install
+          fi
+          if [ -f "Cartfile" ]; then
+            brew install carthage
+            carthage bootstrap --platform iOS
+          fi
+
+      # Step 4: Install Periphery (for unused code detection)
       - name: Install Periphery
         run: |
           curl -sSL https://github.com/peripheryapp/periphery/releases/download/2.6.0/periphery-2.6.0-x86_64-apple-darwin.tar.gz | tar xzv
           sudo mv periphery /usr/local/bin/periphery
 
+      # Step 5: Run Periphery to Check for Unused Code
       - name: Run Periphery to Check for Unused Code
         run: |
-          periphery scan --workspace test_github_action.xcworkspace --scheme test_github_action
+          periphery scan --workspace YourWorkspace.xcworkspace --scheme YourScheme
+
+      # Step 6: Install Tailor (if using Tailor for linting)
+      - name: Install Tailor
+        run: |
+          gem install tailor
+
+      # Step 7: Install Slather (for code coverage reports)
+      - name: Install Slather
+        run: |
+          gem install slather
+
+      # Step 8: Install Lizard (for cyclomatic complexity analysis)
+      - name: Install Lizard
+        run: |
+          brew install lizard
+
+      # Step 9: Run Lizard (for cyclomatic complexity analysis)
+      - name: Run Lizard
+        run: lizard
 
   # Job to merge PR after successful analysis (optional)
-  
   merge:
-      needs: code-analysis  # This job depends on the successful completion of code-analysis
-      runs-on: ubuntu-latest
-      if: success()  # Proceed only if the previous job succeeded
+    needs: code-analysis  # This job depends on the successful completion of code-analysis
+    runs-on: ubuntu-latest
+    if: success()  # Proceed only if the previous job succeeded
 
-      steps:
-        - name: Checkout repository
-          uses: actions/checkout@v2
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
       # Step 1: Set up Git configuration for the merge
-        - name: Set up Git configuration
-          run: |
-            git config --global user.name "GitHub Actions"
-            git config --global user.email "actions@github.com"
+      - name: Set up Git configuration
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
 
       # Step 2: Merge feature branch into development
-        - name: Merge feature branch into development
-          run: |
-            git fetch origin development
-            git checkout development
-            git merge --no-ff ${{ github.head_ref }}  # Merge the feature branch into development
+      - name: Merge feature branch into development
+        run: |
+          git fetch origin development
+          git checkout development
+          git merge --no-ff ${{ github.head_ref }}  # Merge the feature branch into development
 
       # Step 3: Push the merged changes to the remote repository
-        - name: Push merged changes to development
-          run: git push origin development
+      - name: Push merged changes to development
+        run: git push origin development
