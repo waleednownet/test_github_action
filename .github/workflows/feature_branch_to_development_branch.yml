@@ -110,6 +110,7 @@ on:
 #     # Step 13: Run Lizard (for cyclomatic complexity analysis)
 #     - name: Run Lizard
 #       run: lizard
+
 jobs:
   periphery:
     runs-on: macos-latest  # macOS environment is required for Swift
@@ -131,6 +132,10 @@ jobs:
       - name: Run Periphery to Check for Unused Code
         run: |
           periphery scan --workspace YourWorkspace.xcworkspace --scheme YourScheme
+
+
+
+
   # Job to merge PR after successful analysis (optional)
   merge:
     needs: code-analysis  # This job depends on the successful completion of code-analysis
