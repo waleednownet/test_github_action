@@ -116,21 +116,21 @@ jobs:
     runs-on: macos-latest  # macOS environment is required for Swift
 
     steps:
-     - name: Checkout Code
-       uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
-     - name: Set up Xcode
-       uses: apple-actions/setup-xcode@v2
-       with:
+      - name: Set up Xcode
+        uses: apple-actions/setup-xcode@v2
+        with:
           xcode-version: 'latest'  # or specify the version you need
 
-     - name: Install Periphery
-       run: |
+      - name: Install Periphery
+        run: |
           curl -sSL https://github.com/peripheryapp/periphery/releases/download/2.6.0/periphery-2.6.0-x86_64-apple-darwin.tar.gz | tar xzv
           sudo mv periphery /usr/local/bin/periphery
 
-     - name: Run Periphery to Check for Unused Code
-       run: |
+      - name: Run Periphery to Check for Unused Code
+        run: |
           periphery scan --workspace YourWorkspace.xcworkspace --scheme YourScheme
 
   # Job to merge PR after successful analysis (optional)
