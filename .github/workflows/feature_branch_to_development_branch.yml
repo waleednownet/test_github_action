@@ -102,7 +102,10 @@ jobs:
             --project "$PROJECT" \
             --schemes "$SCHEME" \
             --format json \
-            --verbose > periphery-report.json
+            --report-exclude build.log \
+            --retain-public \
+            --strict \
+            --quiet  > periphery-report.json
           
         continue-on-error: true
 
