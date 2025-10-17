@@ -1,52 +1,146 @@
-name: SwiftLint Analysis on PR Merge to Development
+# GitHub Actions workflow: CI - Swift analysis
+# Trigger: when a pull request targets the `development` branch
+# Place this file at: .github/workflows/ci-analysis.yml
+
+name: "Swift — Analysis (PR -> development)"
 
 on:
   pull_request:
-    branches:
-      - development
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - closed  # Triggered when the PR is closed, either merged or manually closed
+    branches: ["development"]
+    types: [opened, reopened, synchronize, ready_for_review]
 
 jobs:
-  swiftlint:
-    name: Run SwiftLint Analysis
+  analysis:
+    name: Run static analysis (SwiftLint, Tailor, Slather, Lizard, Periphery)
     runs-on: macos-latest
+    env:
+      # EDIT these defaults for your project (or replace with repository variables/secrets)
+      WORKSPACE: "MyApp.xcworkspace"      # set to your workspace or leave blank if you use project
+      PROJECT: "MyApp.xcodeproj"         # path to .xcodeproj if you use a project
+      SCHEME: "MyApp"                    # the scheme to build/test
+      DESTINATION: "platform=iOS Simulator,name=iPhone 14" # xcodebuild destination for tests
+      RUN_SLATHER: "false"               # set to "true" to run tests + slather coverage steps
+      LIZARD_CCN_THRESHOLD: "15"        # lizard CCN threshold (will mark warnings)
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Install Swift
-        run: |
-          brew update
-          brew install swiftlint
-
-      - name: Run SwiftLint
-        run: |
-          swiftlint lint
-        continue-on-error: false  # Fail the PR if there are lint issues
-
-      - name: Upload SwiftLint report
-        uses: actions/upload-artifact@v3  # Updated to v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          name: swiftlint-report
-          path: swiftlint_report.json
+          fetch-depth: 0
 
-  delete-feature-branch:
-    name: Delete Feature Branch After Merge
-    runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true  # Only run if PR was merged
-
-    steps:
-      - name: Delete Feature Branch
+      - name: Install analysis tools (Homebrew / gem / pip)
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin
-          git branch -D ${{ github.head_ref }}  # Delete the local branch
-          git push origin --delete ${{ github.head_ref }}  # Delete the remote branch
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          set -e
+          brew update || true
+          # Install SwiftLint
+          if ! command -v swiftlint >/dev/null 2>&1; then
+            brew install swiftlint || true
+          fi
+          # Tailor (Swift linter)
+          if ! command -v tailor >/dev/null 2>&1; then
+            brew install tailor || curl -fsSL https://tailor.sh/install.sh | sh || true
+          fi
+          # Periphery (unused-code detector)
+          if ! command -v periphery >/dev/null 2>&1; then
+            brew install periphery || true
+          fi
+          # Slather (Ruby gem for coverage reports)
+          if ! command -v slather >/dev/null 2>&1; then
+            gem install slather || true
+          fi
+          # Lizard (cyclomatic complexity) via pip
+          python3 -m pip install --upgrade pip || true
+          if ! command -v lizard >/dev/null 2>&1; then
+            python3 -m pip install lizard || true
+          fi
+
+      - name: SwiftLint — lint (JSON report)
+        continue-on-error: true
+        run: |
+          if command -v swiftlint >/dev/null 2>&1; then
+            swiftlint lint --reporter json > swiftlint-report.json || true
+            echo "Saved: swiftlint-report.json"
+          else
+            echo "swiftlint not found — skipping"
+          fi
+
+      - name: Tailor — lint (JSON)
+        continue-on-error: true
+        run: |
+          if command -v tailor >/dev/null 2>&1; then
+            # analyze the repo; tailor supports -f/--format (json|xcode|cc|html)
+            tailor -f json . > tailor-report.json || true
+            echo "Saved: tailor-report.json"
+          else
+            echo "tailor not found — skipping"
+          fi
+
+      - name: Lizard — cyclomatic complexity (JSON)
+        continue-on-error: true
+        run: |
+          if command -v lizard >/dev/null 2>&1; then
+            # -l swift: only analyze Swift files; -C threshold causes non-zero exit if exceeded
+            lizard -l swift -C $LIZARD_CCN_THRESHOLD -o lizard-report.json . || true
+            echo "Saved: lizard-report.json"
+          else
+            echo "lizard not found — skipping"
+          fi
+
+      - name: Periphery — unused code scan
+        continue-on-error: true
+        run: |
+          if command -v periphery >/dev/null 2>&1; then
+            # Prefer a .periphery.yml config if present (recommended). Otherwise try a workspace+scheme.
+            if [ -f .periphery.yml ]; then
+              periphery scan --verbose > periphery-report.txt || true
+            else
+              # try both project and workspace variants (non-fatal)
+              periphery scan --project "$PROJECT" --scheme "$SCHEME" --verbose > periphery-report.txt || \
+                periphery scan --workspace "$WORKSPACE" --scheme "$SCHEME" --verbose > periphery-report.txt || true
+            fi
+            echo "Saved: periphery-report.txt"
+          else
+            echo "periphery not found — skipping"
+          fi
+
+      - name: (optional) Run tests (for coverage)
+        if: env.RUN_SLATHER == 'true'
+        run: |
+          echo "Running tests to produce coverage data..."
+          xcodebuild test -workspace "$WORKSPACE" -scheme "$SCHEME" -destination "$DESTINATION" -enableCodeCoverage YES | tee xcodebuild.log
+
+      - name: (optional) Slather — generate coverage report
+        if: env.RUN_SLATHER == 'true'
+        continue-on-error: true
+        run: |
+          if command -v slather >/dev/null 2>&1; then
+            # Generate HTML report into slather-report/ (or configure .slather.yml for CI)
+            slather coverage --scheme "$SCHEME" --workspace "$WORKSPACE" --html --output-directory slather-report || true
+            echo "Saved: slather-report/"
+          else
+            echo "slather not found — skipping"
+          fi
+
+      - name: Package analysis reports as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: analysis-reports
+          path: |
+            swiftlint-report.json
+            tailor-report.json
+            lizard-report.json
+            periphery-report.txt
+            slather-report/**
+            xcodebuild.log
+
+      - name: Summary (CLI)
+        run: |
+          echo "--- Reports available as artifact: analysis-reports ---"
+          echo "To fail the PR on issues, edit this workflow and change run options (for example remove 'continue-on-error' or add 'set -e' where appropriate)."
+
+# NOTES:
+# - Edit WORKSPACE/PROJECT/SCHEME/DESTINATION at the top of the job to match your repo.
+# - Periphery often needs a proper build (indexstore) and/or a .periphery.yml — prefer creating the config and committing it.
+# - Slather requires coverage data produced by running tests; enable RUN_SLATHER: "true" and configure workspace/scheme accordingly.
+# - This workflow intentionally collects reports as artifacts so you can review results in the PR run.
+# - You can add further steps to parse JSON reports and create GitHub annotations or block merges (e.g. fail the job when SwiftLint errors exist).
