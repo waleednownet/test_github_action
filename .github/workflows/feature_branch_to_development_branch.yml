@@ -88,7 +88,7 @@ jobs:
       - name: Periphery — unused code scan (JSON output)
         run: |
           periphery scan \
-            ----skip-build\
+            --skip-build\
             --project "$PROJECT" \
             --schemes "$SCHEME" \
             --format json \
