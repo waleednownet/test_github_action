@@ -21,4 +21,7 @@ final class TestviewModel {
     func TEST_KASDF() {
         
     }
+    func kaslkdf_sdaf() {
+        
+    }
 }
