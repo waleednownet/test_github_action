@@ -1,90 +1,40 @@
-name: Feature Branch to Development
+name: SwiftLint Analysis on PR Merge to Development
 
-# Trigger the workflow on pull request to 'development' branch
 on:
   pull_request:
     branches:
-      - development  # Trigger when there's a PR to the development branch
+      - development
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
 
 jobs:
-  # Job for running static analysis tools and tests
-  code-analysis:
-    runs-on: macos-latest  # Since you’re working with Swift, macOS is required
+  swiftlint:
+    name: Run SwiftLint Analysis
+    runs-on: macos-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Set up Xcode
-        uses: apple-actions/setup-xcode@v2
+      - name: Set up Swift
+        uses: actions/setup-swift@v2
         with:
-          xcode-version: 'latest'  # or specify the version you need
+          swift-version: '5.7'  # Adjust to your Swift version if needed
 
-      # Step 3: Install dependencies (if using CocoaPods or Carthage)
-      - name: Install dependencies
+      - name: Install SwiftLint
         run: |
-          if [ -f "Podfile" ]; then
-            gem install cocoapods
-            pod install
-          fi
-          if [ -f "Cartfile" ]; then
-            brew install carthage
-            carthage bootstrap --platform iOS
-          fi
+          brew install swiftlint
 
-      # Step 4: Install Periphery (for unused code detection)
-      - name: Install Periphery
+      - name: Run SwiftLint
         run: |
-          curl -sSL https://github.com/peripheryapp/periphery/releases/download/2.6.0/periphery-2.6.0-x86_64-apple-darwin.tar.gz | tar xzv
-          sudo mv periphery /usr/local/bin/periphery
+          swiftlint lint
+        continue-on-error: true  # This will allow the PR to be merged even if SwiftLint finds issues, remove this line if you want to block merges based on lint results
 
-      # Step 5: Run Periphery to Check for Unused Code
-      - name: Run Periphery to Check for Unused Code
-        run: |
-          periphery scan --workspace YourWorkspace.xcworkspace --scheme YourScheme
-
-      # Step 6: Install Tailor (if using Tailor for linting)
-      - name: Install Tailor
-        run: |
-          gem install tailor
-
-      # Step 7: Install Slather (for code coverage reports)
-      - name: Install Slather
-        run: |
-          gem install slather
-
-      # Step 8: Install Lizard (for cyclomatic complexity analysis)
-      - name: Install Lizard
-        run: |
-          brew install lizard
-
-      # Step 9: Run Lizard (for cyclomatic complexity analysis)
-      - name: Run Lizard
-        run: lizard
-
-  # Job to merge PR after successful analysis (optional)
-  merge:
-    needs: code-analysis  # This job depends on the successful completion of code-analysis
-    runs-on: ubuntu-latest
-    if: success()  # Proceed only if the previous job succeeded
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      # Step 1: Set up Git configuration for the merge
-      - name: Set up Git configuration
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-
-      # Step 2: Merge feature branch into development
-      - name: Merge feature branch into development
-        run: |
-          git fetch origin development
-          git checkout development
-          git merge --no-ff ${{ github.head_ref }}  # Merge the feature branch into development
-
-      # Step 3: Push the merged changes to the remote repository
-      - name: Push merged changes to development
-        run: git push origin development
+      - name: Upload SwiftLint report
+        uses: actions/upload-artifact@v3
+        with:
+          name: swiftlint-report
+          path: swiftlint_report.json
