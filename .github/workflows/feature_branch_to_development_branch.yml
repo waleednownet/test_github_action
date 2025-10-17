@@ -43,7 +43,7 @@ jobs:
 
       - name: Annotate SwiftLint results on PR
         if: always()
-        uses: reviewdog/action-reviewdog@v1
+        uses: reviewdog/action-lint@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
