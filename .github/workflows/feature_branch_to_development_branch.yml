@@ -41,18 +41,17 @@ jobs:
           swiftlint lint --reporter json > swiftlint-report.json
           echo "Saved: swiftlint-report.json"
 
-      - name: Install Reviewdog
-        run: |
-          set -e
-          curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s latest
-
       - name: Annotate SwiftLint results on PR
         if: always()
-        env:
-          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -e
-          cat swiftlint-report.json | ./bin/reviewdog -f=swiftlint -reporter=github-pr-review -fail-on-error
+        uses: reviewdog/action-reviewdog@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          fail_on_error: true
+          filter_mode: diff_context
+          level: error
+          tool_name: swiftlint
+          run: cat swiftlint-report.json | reviewdog -f=swiftlint
 
       - name: Tailor — lint (JSON)
         run: |
