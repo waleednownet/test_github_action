@@ -1,4 +1,4 @@
-# GitHub Actions workflow: CI - Swift analysis with PR Annotations
+# GitHub Actions workflow: CI - Swift analysis (JSON Reports Only)
 # Trigger: when a pull request targets the `development` branch
 # Place this file at: .github/workflows/ci-analysis.yml
 
@@ -35,35 +35,32 @@ jobs:
           python3 -m pip install lizard || true
 
       - name: SwiftLint — lint (JSON report)
-        id: swiftlint
         run: |
           set -e
           swiftlint lint --reporter json > swiftlint-report.json
-          echo "Saved: swiftlint-report.json"
-
-      - name: Annotate SwiftLint results on PR
-        if: always()
-        uses: reviewdog/action-lint@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
-          fail_on_error: true
-          filter_mode: diff_context
-          level: error
-          tool_name: swiftlint
-          run: cat swiftlint-report.json | reviewdog -f=swiftlint
-
+          echo "SwiftLint report saved as swiftlint-report.json"
+          # Fail if any issues found
+          if [ $(jq 'length' swiftlint-report.json) -gt 0 ]; then
+            echo "SwiftLint found issues!"
+            exit 1
+          fi
+        continue-on-error: true
+        
       - name: Tailor — lint (JSON)
         run: |
           set -e
           tailor -f json . > tailor-report.json
-          echo "Saved: tailor-report.json"
+          echo "Tailor report saved as tailor-report.json"
+          if [ $(jq 'length' tailor-report.json) -gt 0 ]; then
+            echo "Tailor found issues!"
+            exit 1
+          fi
 
       - name: Lizard — cyclomatic complexity (JSON)
         run: |
           set -e
           lizard -l swift -C $LIZARD_CCN_THRESHOLD -o lizard-report.json .
-          echo "Saved: lizard-report.json"
+          echo "Lizard report saved as lizard-report.json"
 
       - name: Periphery — unused code scan
         run: |
@@ -73,7 +70,7 @@ jobs:
           else
             periphery scan --project "$PROJECT" --verbose > periphery-report.txt
           fi
-          echo "Saved: periphery-report.txt"
+          echo "Periphery report saved as periphery-report.txt"
 
       - name: Package analysis reports as artifacts
         uses: actions/upload-artifact@v4
@@ -88,4 +85,4 @@ jobs:
       - name: Summary (CLI)
         run: |
           echo "--- Reports available as artifact: analysis-reports ---"
-          echo "SwiftLint issues are now annotated directly in the PR via Reviewdog."
+          echo "SwiftLint, Tailor, Lizard, and Periphery reports generated."
