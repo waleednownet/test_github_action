@@ -20,6 +20,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Build project for indexing
+        run: |
+          set -e
+          xcodebuild -project "$PROJECT" \
+            -scheme "$SCHEME" \
+            -destination 'generic/platform=iOS Simulator' \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            build-for-testing
+
       - name: Install analysis tools (Homebrew / gem / pip)
         run: |
           set -e
@@ -88,7 +99,6 @@ jobs:
       - name: Periphery — unused code scan (JSON output)
         run: |
           periphery scan \
-            --skip-build\
             --project "$PROJECT" \
             --schemes "$SCHEME" \
             --format json \
