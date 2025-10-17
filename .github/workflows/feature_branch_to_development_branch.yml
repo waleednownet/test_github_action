@@ -8,7 +8,7 @@ on:
 jobs:
   analysis:
     name: Run static analysis (SwiftLint, Tailor, Slather, Lizard, Periphery)
-    runs-on: macos-latest
+    runs-on: macos-26
     env:
       PROJECT: "test_github_action.xcodeproj"
       SCHEME: "test_github_action"
