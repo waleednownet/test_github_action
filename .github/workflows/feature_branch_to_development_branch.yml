@@ -84,15 +84,19 @@ jobs:
           name: lizard-report
           path: lizard-report.json
 
-      - name: Periphery — unused code scan
+      - name: Periphery — unused code scan (JSON output)
         run: |
           set -e
           if [ -f .periphery.yml ]; then
-            periphery scan --verbose > periphery-report.txt
+            periphery scan --format json --verbose > periphery-report.json
           else
-            periphery scan --project "$PROJECT" --verbose > periphery-report.txt
+            periphery scan \
+              --project "$PROJECT" \
+              --scheme "test_github_action" \
+              --format json \
+              --verbose > periphery-report.json
           fi
-          echo "Periphery report saved as periphery-report.txt"
+          echo "Periphery report saved as periphery-report.json"
           
         continue-on-error: true
 
@@ -101,7 +105,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: periphery-report
-          path: periphery-report.txt
+          path: periphery-report.json
+
 
       - name: Summary (CLI)
         run: |
