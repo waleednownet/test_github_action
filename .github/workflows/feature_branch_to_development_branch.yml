@@ -15,9 +15,9 @@ jobs:
     runs-on: macos-latest
     env:
       # EDIT these defaults for your project (or replace with repository variables/secrets)
-      WORKSPACE: "MyApp.xcworkspace"      # set to your workspace or leave blank if you use project
-      PROJECT: "MyApp.xcodeproj"         # path to .xcodeproj if you use a project
-      SCHEME: "MyApp"                    # the scheme to build/test
+      WORKSPACE: ""      # set to your workspace or leave blank if you use project
+      PROJECT: "test_github_action.xcodeproj"         # path to .xcodeproj if you use a project
+      SCHEME: "test_github_action"                    # the scheme to build/test
       DESTINATION: "platform=iOS Simulator,name=iPhone 14" # xcodebuild destination for tests
       RUN_SLATHER: "false"               # set to "true" to run tests + slather coverage steps
       LIZARD_CCN_THRESHOLD: "15"        # lizard CCN threshold (will mark warnings)
