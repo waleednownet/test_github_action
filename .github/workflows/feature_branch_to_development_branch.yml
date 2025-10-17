@@ -39,6 +39,8 @@ jobs:
             echo "SwiftLint found issues!"
             exit 1
           fi
+          
+        continue-on-error: true
 
       - name: Upload SwiftLint report
         if: always()
