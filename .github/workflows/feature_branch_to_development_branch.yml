@@ -19,15 +19,22 @@ jobs:
         with:
           fetch-depth: 0
           
-      - name: List repository files (debugging step)
+      - name: Verify files in the repository (debugging step)
         run: |
-          ls -R  # List all files to confirm the location of .xcodeproj
+          echo "Current working directory:"
+          pwd  # Print current working directory
+          echo "Listing all files in the repository:"
+          ls -la  # List files in the current directory
 
   build:
     name: Build project for indexing
     runs-on: macos-26
     needs: checkout
     steps:
+      - name: Select Xcode version
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.0.1.app/Contents/Developer  # Ensure correct Xcode is selected
+
       - name: Build project for indexing
         run: |
           set -e
