@@ -9,7 +9,6 @@ jobs:
   checkout:
     name: Checkout repository
     runs-on: macos-26
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,6 +19,9 @@ jobs:
     name: Build project for indexing
     runs-on: macos-26
     needs: checkout
+    env:
+      PROJECT: "test_github_action.xcodeproj"  # Ensure these are set
+      SCHEME: "test_github_action"
     steps:
       - name: Build project for indexing
         run: |
@@ -36,6 +38,9 @@ jobs:
     name: Install analysis tools (Homebrew / gem / pip)
     runs-on: macos-26
     needs: build
+    env:
+      PROJECT: "test_github_action.xcodeproj"  # Ensure these are passed to the install-tools job
+      SCHEME: "test_github_action"
     steps:
       - name: Install analysis tools
         run: |
@@ -52,6 +57,9 @@ jobs:
     name: SwiftLint — lint (JSON report)
     runs-on: macos-26
     needs: install-tools
+    env:
+      PROJECT: "test_github_action.xcodeproj"  # Ensure these are passed to swiftlint
+      SCHEME: "test_github_action"
     continue-on-error: true
     steps:
       - name: Run SwiftLint
@@ -75,6 +83,9 @@ jobs:
     name: Tailor — lint (JSON)
     runs-on: macos-26
     needs: install-tools
+    env:
+      PROJECT: "test_github_action.xcodeproj"  # Ensure these are passed to tailor
+      SCHEME: "test_github_action"
     continue-on-error: true
     steps:
       - name: Run Tailor
@@ -98,6 +109,9 @@ jobs:
     name: Lizard — cyclomatic complexity (JSON)
     runs-on: macos-26
     needs: install-tools
+    env:
+      PROJECT: "test_github_action.xcodeproj"  # Ensure these are passed to lizard
+      SCHEME: "test_github_action"
     continue-on-error: true
     steps:
       - name: Run Lizard
@@ -117,6 +131,9 @@ jobs:
     name: Periphery — unused code scan (JSON output)
     runs-on: macos-26
     needs: install-tools
+    env:
+      PROJECT: "test_github_action.xcodeproj"  # Ensure these are passed to periphery
+      SCHEME: "test_github_action"
     continue-on-error: true
     steps:
       - name: Run Periphery
