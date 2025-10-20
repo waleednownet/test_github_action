@@ -13,7 +13,7 @@ jobs:
       PROJECT: "test_github_action.xcodeproj"
       SCHEME: "test_github_action"
       LIZARD_CCN_THRESHOLD: "15"
-
+      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -101,7 +101,7 @@ jobs:
             --report-exclude build.log \
             --retain-public \
             --strict \
-            --quiet  > periphery-report.json
+            --quiet > periphery-report.json
         continue-on-error: true
 
       - name: Upload Periphery report
