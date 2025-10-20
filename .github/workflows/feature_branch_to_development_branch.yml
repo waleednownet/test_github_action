@@ -19,6 +19,9 @@ jobs:
     name: Build project for indexing
     runs-on: macos-26
     needs: checkout
+    env:
+      PROJECT: "test_github_action.xcodeproj"
+      SCHEME: "test_github_action"
     steps:
       - name: Build project for indexing
         run: |
@@ -51,6 +54,9 @@ jobs:
     name: SwiftLint — lint (JSON report)
     runs-on: macos-26
     needs: [install_tools, build]
+    env:
+      PROJECT: "test_github_action.xcodeproj"
+      SCHEME: "test_github_action"
     steps:
       - name: Run SwiftLint Analysis
         run: |
@@ -74,6 +80,9 @@ jobs:
     name: Tailor — lint (JSON)
     runs-on: macos-26
     needs: [install_tools, build]
+    env:
+      PROJECT: "test_github_action.xcodeproj"
+      SCHEME: "test_github_action"
     steps:
       - name: Run Tailor Analysis
         run: |
@@ -97,6 +106,8 @@ jobs:
     name: Lizard — cyclomatic complexity (JSON)
     runs-on: macos-26
     needs: [install_tools, build]
+    env:
+      LIZARD_CCN_THRESHOLD: "15"
     steps:
       - name: Run Lizard Analysis
         run: |
@@ -116,6 +127,9 @@ jobs:
     name: Periphery — unused code scan (JSON output)
     runs-on: macos-26
     needs: [install_tools, build]
+    env:
+      PROJECT: "test_github_action.xcodeproj"
+      SCHEME: "test_github_action"
     steps:
       - name: Run Periphery Analysis
         run: |
