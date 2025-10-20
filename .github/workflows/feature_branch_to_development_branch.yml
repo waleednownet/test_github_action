@@ -6,23 +6,20 @@ on:
     types: [opened, reopened, synchronize, ready_for_review]
 
 jobs:
-  checkout:
-    name: Checkout repository
+  analysis:
+    name: Run static analysis (SwiftLint, Tailor, Slather, Lizard, Periphery)
     runs-on: macos-26
+    env:
+      PROJECT: "test_github_action.xcodeproj"
+      SCHEME: "test_github_action"
+      LIZARD_CCN_THRESHOLD: "15"
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-  build:
-    name: Build project for indexing
-    runs-on: macos-26
-    needs: checkout
-    env:
-      PROJECT: "test_github_action.xcodeproj"
-      SCHEME: "test_github_action"
-    steps:
       - name: Build project for indexing
         run: |
           set -e
@@ -34,11 +31,6 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build-for-testing
 
-  install_tools:
-    name: Install analysis tools (Homebrew / gem / pip)
-    runs-on: macos-26
-    needs: checkout
-    steps:
       - name: Install analysis tools (Homebrew / gem / pip)
         run: |
           set -e
@@ -50,15 +42,7 @@ jobs:
           python3 -m pip install --upgrade pip || true
           python3 -m pip install lizard || true
 
-  swiftlint_analysis:
-    name: SwiftLint — lint (JSON report)
-    runs-on: macos-26
-    needs: [install_tools, build]
-    env:
-      PROJECT: "test_github_action.xcodeproj"
-      SCHEME: "test_github_action"
-    steps:
-      - name: Run SwiftLint Analysis
+      - name: SwiftLint — lint (JSON report)
         run: |
           set -e
           swiftlint lint --reporter json > swiftlint-report.json
@@ -76,15 +60,7 @@ jobs:
           name: swiftlint-report
           path: swiftlint-report.json
 
-  tailor_analysis:
-    name: Tailor — lint (JSON)
-    runs-on: macos-26
-    needs: [install_tools, build]
-    env:
-      PROJECT: "test_github_action.xcodeproj"
-      SCHEME: "test_github_action"
-    steps:
-      - name: Run Tailor Analysis
+      - name: Tailor — lint (JSON)
         run: |
           set -e
           tailor -f json . > tailor-report.json
@@ -102,14 +78,7 @@ jobs:
           name: tailor-report
           path: tailor-report.json
 
-  lizard_analysis:
-    name: Lizard — cyclomatic complexity (JSON)
-    runs-on: macos-26
-    needs: [install_tools, build]
-    env:
-      LIZARD_CCN_THRESHOLD: "15"
-    steps:
-      - name: Run Lizard Analysis
+      - name: Lizard — cyclomatic complexity (JSON)
         run: |
           set -e
           lizard -l swift -C $LIZARD_CCN_THRESHOLD -o lizard-report.json .
@@ -123,15 +92,7 @@ jobs:
           name: lizard-report
           path: lizard-report.json
 
-  periphery_analysis:
-    name: Periphery — unused code scan (JSON output)
-    runs-on: macos-26
-    needs: [install_tools, build]
-    env:
-      PROJECT: "test_github_action.xcodeproj"
-      SCHEME: "test_github_action"
-    steps:
-      - name: Run Periphery Analysis
+      - name: Periphery — unused code scan (JSON output)
         run: |
           periphery scan \
             --project "$PROJECT" \
@@ -150,12 +111,7 @@ jobs:
           name: periphery-report
           path: periphery-report.json
 
-  summary:
-    name: Summary (CLI)
-    runs-on: macos-26
-    needs: [swiftlint_analysis, tailor_analysis, lizard_analysis, periphery_analysis]
-    steps:
-      - name: Display summary of reports
+      - name: Summary (CLI)
         run: |
           echo "--- Individual reports uploaded as artifacts ---"
           echo "✅ swiftlint-report.json"
