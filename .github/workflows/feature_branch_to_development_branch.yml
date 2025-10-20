@@ -5,6 +5,10 @@ on:
     branches: ["development"]
     types: [opened, reopened, synchronize, ready_for_review]
 
+env:
+  PROJECT: "test_github_action.xcodeproj"  # Global environment variable for PROJECT
+  SCHEME: "test_github_action"            # Global environment variable for SCHEME
+
 jobs:
   checkout:
     name: Checkout repository
@@ -19,9 +23,6 @@ jobs:
     name: Build project for indexing
     runs-on: macos-26
     needs: checkout
-    env:
-      PROJECT: "test_github_action.xcodeproj"  # Explicitly setting these in each job
-      SCHEME: "test_github_action"
     steps:
       - name: Build project for indexing
         run: |
@@ -38,9 +39,6 @@ jobs:
     name: Install analysis tools (Homebrew / gem / pip)
     runs-on: macos-26
     needs: build
-    env:
-      PROJECT: "test_github_action.xcodeproj"  # Ensure these are passed
-      SCHEME: "test_github_action"
     steps:
       - name: Install analysis tools
         run: |
@@ -57,9 +55,6 @@ jobs:
     name: SwiftLint — lint (JSON report)
     runs-on: macos-26
     needs: install-tools
-    env:
-      PROJECT: "test_github_action.xcodeproj"  # Pass these in swiftlint job
-      SCHEME: "test_github_action"
     continue-on-error: true
     steps:
       - name: Run SwiftLint
@@ -83,9 +78,6 @@ jobs:
     name: Tailor — lint (JSON)
     runs-on: macos-26
     needs: install-tools
-    env:
-      PROJECT: "test_github_action.xcodeproj"  # Explicitly set in each job
-      SCHEME: "test_github_action"
     continue-on-error: true
     steps:
       - name: Run Tailor
@@ -109,9 +101,6 @@ jobs:
     name: Lizard — cyclomatic complexity (JSON)
     runs-on: macos-26
     needs: install-tools
-    env:
-      PROJECT: "test_github_action.xcodeproj"  # Explicitly set here too
-      SCHEME: "test_github_action"
     continue-on-error: true
     steps:
       - name: Run Lizard
@@ -131,9 +120,6 @@ jobs:
     name: Periphery — unused code scan (JSON output)
     runs-on: macos-26
     needs: install-tools
-    env:
-      PROJECT: "test_github_action.xcodeproj"  # Pass in periphery job as well
-      SCHEME: "test_github_action"
     continue-on-error: true
     steps:
       - name: Run Periphery
