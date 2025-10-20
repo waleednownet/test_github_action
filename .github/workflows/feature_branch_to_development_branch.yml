@@ -6,13 +6,9 @@ on:
     types: [opened, reopened, synchronize, ready_for_review]
 
 jobs:
-  analysis:
-    name: Run static analysis (SwiftLint, Tailor, Slather, Lizard, Periphery)
+  checkout:
+    name: Checkout repository
     runs-on: macos-26
-    env:
-      PROJECT: "test_github_action.xcodeproj"
-      SCHEME: "test_github_action"
-      LIZARD_CCN_THRESHOLD: "15"
 
     steps:
       - name: Checkout repository
@@ -20,6 +16,11 @@ jobs:
         with:
           fetch-depth: 0
 
+  build:
+    name: Build project for indexing
+    runs-on: macos-26
+    needs: checkout
+    steps:
       - name: Build project for indexing
         run: |
           set -e
@@ -31,7 +32,12 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build-for-testing
 
-      - name: Install analysis tools (Homebrew / gem / pip)
+  install-tools:
+    name: Install analysis tools (Homebrew / gem / pip)
+    runs-on: macos-26
+    needs: build
+    steps:
+      - name: Install analysis tools
         run: |
           set -e
           brew update || true
@@ -42,7 +48,13 @@ jobs:
           python3 -m pip install --upgrade pip || true
           python3 -m pip install lizard || true
 
-      - name: SwiftLint — lint (JSON report)
+  swiftlint:
+    name: SwiftLint — lint (JSON report)
+    runs-on: macos-26
+    needs: install-tools
+    continue-on-error: true
+    steps:
+      - name: Run SwiftLint
         run: |
           set -e
           swiftlint lint --reporter json > swiftlint-report.json
@@ -51,8 +63,6 @@ jobs:
             echo "SwiftLint found issues!"
             exit 1
           fi
-          
-        continue-on-error: true
 
       - name: Upload SwiftLint report
         if: always()
@@ -61,7 +71,13 @@ jobs:
           name: swiftlint-report
           path: swiftlint-report.json
 
-      - name: Tailor — lint (JSON)
+  tailor:
+    name: Tailor — lint (JSON)
+    runs-on: macos-26
+    needs: install-tools
+    continue-on-error: true
+    steps:
+      - name: Run Tailor
         run: |
           set -e
           tailor -f json . > tailor-report.json
@@ -71,8 +87,6 @@ jobs:
             exit 1
           fi
 
-        continue-on-error: true
-
       - name: Upload Tailor report
         if: always()
         uses: actions/upload-artifact@v4
@@ -80,14 +94,17 @@ jobs:
           name: tailor-report
           path: tailor-report.json
 
-      - name: Lizard — cyclomatic complexity (JSON)
+  lizard:
+    name: Lizard — cyclomatic complexity (JSON)
+    runs-on: macos-26
+    needs: install-tools
+    continue-on-error: true
+    steps:
+      - name: Run Lizard
         run: |
           set -e
           lizard -l swift -C $LIZARD_CCN_THRESHOLD -o lizard-report.json .
           echo "Lizard report saved as lizard-report.json"
-
-          
-        continue-on-error: true
 
       - name: Upload Lizard report
         if: always()
@@ -96,7 +113,13 @@ jobs:
           name: lizard-report
           path: lizard-report.json
 
-      - name: Periphery — unused code scan (JSON output)
+  periphery:
+    name: Periphery — unused code scan (JSON output)
+    runs-on: macos-26
+    needs: install-tools
+    continue-on-error: true
+    steps:
+      - name: Run Periphery
         run: |
           periphery scan \
             --project "$PROJECT" \
@@ -106,8 +129,6 @@ jobs:
             --retain-public \
             --strict \
             --quiet  > periphery-report.json
-          
-        continue-on-error: true
 
       - name: Upload Periphery report
         if: always()
@@ -116,11 +137,15 @@ jobs:
           name: periphery-report
           path: periphery-report.json
 
-
-      - name: Summary (CLI)
+  summary:
+    name: Summary (CLI)
+    runs-on: macos-26
+    needs: [swiftlint, tailor, lizard, periphery]
+    steps:
+      - name: Show summary
         run: |
           echo "--- Individual reports uploaded as artifacts ---"
           echo "✅ swiftlint-report.json"
           echo "✅ tailor-report.json"
           echo "✅ lizard-report.json"
-          echo "✅ periphery-report.txt"
+          echo "✅ periphery-report.json"
