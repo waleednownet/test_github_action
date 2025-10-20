@@ -12,7 +12,7 @@ env:
 jobs:
   checkout:
     name: Checkout repository
-    runs-on: macos-26
+    # runs-on: macos-26
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
