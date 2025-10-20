@@ -20,7 +20,7 @@ jobs:
     runs-on: macos-26
     needs: checkout
     env:
-      PROJECT: "test_github_action.xcodeproj"  # Ensure these are set
+      PROJECT: "test_github_action.xcodeproj"  # Explicitly setting these in each job
       SCHEME: "test_github_action"
     steps:
       - name: Build project for indexing
@@ -39,7 +39,7 @@ jobs:
     runs-on: macos-26
     needs: build
     env:
-      PROJECT: "test_github_action.xcodeproj"  # Ensure these are passed to the install-tools job
+      PROJECT: "test_github_action.xcodeproj"  # Ensure these are passed
       SCHEME: "test_github_action"
     steps:
       - name: Install analysis tools
@@ -58,7 +58,7 @@ jobs:
     runs-on: macos-26
     needs: install-tools
     env:
-      PROJECT: "test_github_action.xcodeproj"  # Ensure these are passed to swiftlint
+      PROJECT: "test_github_action.xcodeproj"  # Pass these in swiftlint job
       SCHEME: "test_github_action"
     continue-on-error: true
     steps:
@@ -84,7 +84,7 @@ jobs:
     runs-on: macos-26
     needs: install-tools
     env:
-      PROJECT: "test_github_action.xcodeproj"  # Ensure these are passed to tailor
+      PROJECT: "test_github_action.xcodeproj"  # Explicitly set in each job
       SCHEME: "test_github_action"
     continue-on-error: true
     steps:
@@ -110,7 +110,7 @@ jobs:
     runs-on: macos-26
     needs: install-tools
     env:
-      PROJECT: "test_github_action.xcodeproj"  # Ensure these are passed to lizard
+      PROJECT: "test_github_action.xcodeproj"  # Explicitly set here too
       SCHEME: "test_github_action"
     continue-on-error: true
     steps:
@@ -132,7 +132,7 @@ jobs:
     runs-on: macos-26
     needs: install-tools
     env:
-      PROJECT: "test_github_action.xcodeproj"  # Ensure these are passed to periphery
+      PROJECT: "test_github_action.xcodeproj"  # Pass in periphery job as well
       SCHEME: "test_github_action"
     continue-on-error: true
     steps:
