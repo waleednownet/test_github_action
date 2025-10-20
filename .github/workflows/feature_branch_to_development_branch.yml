@@ -15,9 +15,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-env:
-  PROJECT: "test_github_action.xcodeproj"  # Global environment variable for PROJECT
-  SCHEME: "test_github_action"            # Global environment variable for SCHEME
+    env:
+      PROJECT: "test_github_action.xcodeproj"  # Global environment variable for PROJECT
+      SCHEME: "test_github_action"            # Global environment variable for SCHEME
 
   build:
     name: Build project for indexing
