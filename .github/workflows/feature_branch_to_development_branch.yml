@@ -5,36 +5,21 @@ on:
     branches: ["development"]
     types: [opened, reopened, synchronize, ready_for_review]
 
-env:
-  PROJECT: "test_github_action.xcodeproj"  # Global environment variable for PROJECT
-  SCHEME: "test_github_action"            # Global environment variable for SCHEME
-
 jobs:
   checkout:
     name: Checkout repository
-    # runs-on: macos-26
+    runs-on: macos-26
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
-      - name: Verify files in the repository (debugging step)
-        run: |
-          echo "Current working directory:"
-          pwd  # Print current working directory
-          echo "Listing all files in the repository:"
-          ls -la  # List files in the current directory
 
   build:
     name: Build project for indexing
     runs-on: macos-26
     needs: checkout
     steps:
-      - name: Select Xcode version
-        run: |
-          sudo xcode-select -s /Applications/Xcode_26.0.1.app/Contents/Developer  # Ensure correct Xcode is selected
-
       - name: Build project for indexing
         run: |
           set -e
@@ -46,12 +31,12 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build-for-testing
 
-  install-tools:
+  install_tools:
     name: Install analysis tools (Homebrew / gem / pip)
     runs-on: macos-26
-    needs: build
+    needs: checkout
     steps:
-      - name: Install analysis tools
+      - name: Install analysis tools (Homebrew / gem / pip)
         run: |
           set -e
           brew update || true
@@ -62,13 +47,12 @@ jobs:
           python3 -m pip install --upgrade pip || true
           python3 -m pip install lizard || true
 
-  swiftlint:
+  swiftlint_analysis:
     name: SwiftLint — lint (JSON report)
     runs-on: macos-26
-    needs: install-tools
-    continue-on-error: true
+    needs: [install_tools, build]
     steps:
-      - name: Run SwiftLint
+      - name: Run SwiftLint Analysis
         run: |
           set -e
           swiftlint lint --reporter json > swiftlint-report.json
@@ -77,6 +61,7 @@ jobs:
             echo "SwiftLint found issues!"
             exit 1
           fi
+        continue-on-error: true
 
       - name: Upload SwiftLint report
         if: always()
@@ -85,13 +70,12 @@ jobs:
           name: swiftlint-report
           path: swiftlint-report.json
 
-  tailor:
+  tailor_analysis:
     name: Tailor — lint (JSON)
     runs-on: macos-26
-    needs: install-tools
-    continue-on-error: true
+    needs: [install_tools, build]
     steps:
-      - name: Run Tailor
+      - name: Run Tailor Analysis
         run: |
           set -e
           tailor -f json . > tailor-report.json
@@ -100,6 +84,7 @@ jobs:
             echo "Tailor found issues!"
             exit 1
           fi
+        continue-on-error: true
 
       - name: Upload Tailor report
         if: always()
@@ -108,17 +93,17 @@ jobs:
           name: tailor-report
           path: tailor-report.json
 
-  lizard:
+  lizard_analysis:
     name: Lizard — cyclomatic complexity (JSON)
     runs-on: macos-26
-    needs: install-tools
-    continue-on-error: true
+    needs: [install_tools, build]
     steps:
-      - name: Run Lizard
+      - name: Run Lizard Analysis
         run: |
           set -e
           lizard -l swift -C $LIZARD_CCN_THRESHOLD -o lizard-report.json .
           echo "Lizard report saved as lizard-report.json"
+        continue-on-error: true
 
       - name: Upload Lizard report
         if: always()
@@ -127,13 +112,12 @@ jobs:
           name: lizard-report
           path: lizard-report.json
 
-  periphery:
+  periphery_analysis:
     name: Periphery — unused code scan (JSON output)
     runs-on: macos-26
-    needs: install-tools
-    continue-on-error: true
+    needs: [install_tools, build]
     steps:
-      - name: Run Periphery
+      - name: Run Periphery Analysis
         run: |
           periphery scan \
             --project "$PROJECT" \
@@ -143,6 +127,7 @@ jobs:
             --retain-public \
             --strict \
             --quiet  > periphery-report.json
+        continue-on-error: true
 
       - name: Upload Periphery report
         if: always()
@@ -154,9 +139,9 @@ jobs:
   summary:
     name: Summary (CLI)
     runs-on: macos-26
-    needs: [swiftlint, tailor, lizard, periphery]
+    needs: [swiftlint_analysis, tailor_analysis, lizard_analysis, periphery_analysis]
     steps:
-      - name: Show summary
+      - name: Display summary of reports
         run: |
           echo "--- Individual reports uploaded as artifacts ---"
           echo "✅ swiftlint-report.json"
