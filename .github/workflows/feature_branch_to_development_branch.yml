@@ -1,25 +1,26 @@
-name: "Swift — Analysis (PR -> development)"
-
-on:
+name: Swift — Analysis (PR -> development)
+'on':
   pull_request:
-    branches: ["development"]
-    types: [opened, reopened, synchronize, ready_for_review]
-
+    branches:
+      - development
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
 jobs:
   analysis:
-    name: Run static analysis (SwiftLint, Tailor, Slather, Lizard, Periphery)
+    name: 'Run static analysis (SwiftLint, Tailor, Slather, Lizard, Periphery)'
     runs-on: macos-26
     env:
-      PROJECT: "test_github_action.xcodeproj"
-      SCHEME: "test_github_action"
-      LIZARD_CCN_THRESHOLD: "15"
-      
+      PROJECT: test_github_action.xcodeproj
+      SCHEME: test_github_action
+      LIZARD_CCN_THRESHOLD: '15'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: Build project for indexing
         run: |
           set -e
@@ -30,18 +31,24 @@ jobs:
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
             build-for-testing
-
       - name: Install analysis tools (Homebrew / gem / pip)
-        run: |
+        run: >
           set -e
-          brew update || true
-          brew install swiftlint || true
-          brew install tailor || curl -fsSL https://tailor.sh/install.sh | sh || true
-          brew install periphery || true
-          gem install slather || true
-          python3 -m pip install --upgrade pip || true
-          python3 -m pip install lizard || true
 
+          brew update || true
+
+          brew install swiftlint || true
+
+          brew install tailor || curl -fsSL https://tailor.sh/install.sh | sh ||
+          true
+
+          brew install periphery || true
+
+          gem install slather || true
+
+          python3 -m pip install --upgrade pip || true
+
+          python3 -m pip install lizard || true
       - name: SwiftLint — lint (JSON report)
         run: |
           set -e
@@ -52,14 +59,12 @@ jobs:
             exit 1
           fi
         continue-on-error: true
-
       - name: Upload SwiftLint report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: swiftlint-report
           path: swiftlint-report.json
-
       - name: Tailor — lint (JSON)
         run: |
           set -e
@@ -70,28 +75,24 @@ jobs:
             exit 1
           fi
         continue-on-error: true
-
       - name: Upload Tailor report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: tailor-report
           path: tailor-report.json
-
       - name: Lizard — cyclomatic complexity (JSON)
         run: |
           set -e
           lizard -l swift -C $LIZARD_CCN_THRESHOLD -o lizard-report.json .
           echo "Lizard report saved as lizard-report.json"
         continue-on-error: true
-
       - name: Upload Lizard report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: lizard-report
           path: lizard-report.json
-
       - name: Periphery — unused code scan (JSON output)
         run: |
           periphery scan \
@@ -101,20 +102,18 @@ jobs:
             --report-exclude build.log \
             --retain-public \
             --strict \
-            --quiet > periphery-report.json
+            --quiet  > periphery-report.json
         continue-on-error: true
-
       - name: Upload Periphery report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: periphery-report
           path: periphery-report.json
-
       - name: Summary (CLI)
         run: |
           echo "--- Individual reports uploaded as artifacts ---"
           echo "✅ swiftlint-report.json"
           echo "✅ tailor-report.json"
           echo "✅ lizard-report.json"
-          echo "✅ periphery-report.json"
+          echo "✅ periphery-report.txt"
