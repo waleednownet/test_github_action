@@ -1,0 +1,12 @@
+# Optionally specify which files/folders to include/exclude
+include:
+  - Sources
+exclude:
+  - Pods
+  - Vendor
+  - Tests
+  - trailing-whitespace
+
+# You can still configure output format or color
+format: xcode    # or json
+color: disable   # or invert, or omit to use default
