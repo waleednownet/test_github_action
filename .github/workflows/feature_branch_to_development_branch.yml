@@ -75,41 +75,41 @@ jobs:
             exit 1
           fi
         continue-on-error: true
-      - name: Upload Tailor report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: tailor-report
-          path: tailor-report.json
-      - name: Lizard — cyclomatic complexity (JSON)
-        run: |
-          set -e
-          lizard -l swift -C $LIZARD_CCN_THRESHOLD -o lizard-report.json .
-          echo "Lizard report saved as lizard-report.json"
-        continue-on-error: true
-      - name: Upload Lizard report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lizard-report
-          path: lizard-report.json
-      - name: Periphery — unused code scan (JSON output)
-        run: |
-          periphery scan \
-            --project "$PROJECT" \
-            --schemes "$SCHEME" \
-            --format json \
-            --report-exclude build.log \
-            --retain-public \
-            --strict \
-            --quiet  > periphery-report.json
-        continue-on-error: true
-      - name: Upload Periphery report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: periphery-report
-          path: periphery-report.json
+      # - name: Upload Tailor report
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: tailor-report
+      #     path: tailor-report.json
+      # - name: Lizard — cyclomatic complexity (JSON)
+      #   run: |
+      #     set -e
+      #     lizard -l swift -C $LIZARD_CCN_THRESHOLD -o lizard-report.json .
+      #     echo "Lizard report saved as lizard-report.json"
+      #   continue-on-error: true
+      # - name: Upload Lizard report
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: lizard-report
+      #     path: lizard-report.json
+      # - name: Periphery — unused code scan (JSON output)
+      #   run: |
+      #     periphery scan \
+      #       --project "$PROJECT" \
+      #       --schemes "$SCHEME" \
+      #       --format json \
+      #       --report-exclude build.log \
+      #       --retain-public \
+      #       --strict \
+      #       --quiet  > periphery-report.json
+      #   continue-on-error: true
+      # - name: Upload Periphery report
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: periphery-report
+      #     path: periphery-report.json
       - name: Summary (CLI)
         run: |
           echo "--- Individual reports uploaded as artifacts ---"
